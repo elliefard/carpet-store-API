@@ -1,88 +1,92 @@
-const fs = require('fs');
+const Item = require('./../models/itemModel');
 
-const items = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/items.json`)
-);
-
-exports.getAllItems = (req, res) => {
-  console.log(req.requestTime);
-
-  res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime,
-    results: items.length,
-    data: {
-      items,
-    },
-  });
-};
-
-exports.getItem = (req, res) => {
-  const id = req.params.id * 1;
-
-  if (id > items.length) {
-    return res.status(404).json({
+exports.getAllItems = async (req, res) => {
+  try {
+    const items = await Item.find();
+    res.status(200).json({
+      status: 'success',
+      results: items.length,
+      data: {
+        items,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
       status: 'fail',
-      message: 'Invalid id',
+      message: err,
     });
   }
-
-  const item = items.find((el) => el.id === id);
-  res.status(200).json({
-    status: 'success',
-    data: {
-      item,
-    },
-  });
 };
 
-exports.createItem = (req, res) => {
-  const newId = items[items.length - 1].id + 1;
-  const newItem = Object.assign({ id: newId }, req.body);
+exports.getItem = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
 
-  items.push(newItem);
-
-  fs.writeFile(
-    `${__dirname}/dev-data/data/items.json`,
-    JSON.stringify(items),
-    (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          item: newItem,
-        },
-      });
-    }
-  );
-};
-
-exports.updateItem = (req, res) => {
-  if (req.params.id * 1 > items.length) {
-    return res.status(404).json({
+    res.status(200).json({
+      status: 'success',
+      data: {
+        item,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
       status: 'fail',
-      message: 'Invalid id',
+      message: err,
     });
   }
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: '<updated tour>',
-    },
-  });
 };
 
-exports.deleteItem = (req, res) => {
-  if (req.params.id * 1 > items.length) {
-    return res.status(404).json({
+exports.createItem = async (req, res) => {
+  try {
+    const newItem = await Item.create(req.body);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        item: newItem,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
       status: 'fail',
-      message: 'Invalid id',
+      message: err,
     });
   }
+};
 
-  res.status(204).json({
-    status: 'success',
-    message: 'item deleted',
-    data: null,
-  });
+exports.updateItem = async (req, res) => {
+  try {
+    const item = await Item.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        item,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.deleteItem = async (req, res) => {
+  try {
+    await Item.findByIdAndDelete(req.params.id);
+
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
