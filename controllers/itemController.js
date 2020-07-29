@@ -3,7 +3,7 @@ const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
-exports.getAllItems = catchAsync(async (req, res) => {
+exports.getAllItems = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Item.find(), req.query).filter().sort().limitFields().paginate();
   const items = await features.query;
 
@@ -16,7 +16,7 @@ exports.getAllItems = catchAsync(async (req, res) => {
   });
 });
 
-exports.getItem = catchAsync(async (req, res) => {
+exports.getItem = catchAsync(async (req, res, next) => {
   const item = await Item.findById(req.params.id);
 
   if (!iteem) {
@@ -31,7 +31,7 @@ exports.getItem = catchAsync(async (req, res) => {
   });
 });
 
-exports.createItem = catchAsync(async (req, res) => {
+exports.createItem = catchAsync(async (req, res, next) => {
   const newItem = await Item.create(req.body);
 
   res.status(200).json({
@@ -42,7 +42,7 @@ exports.createItem = catchAsync(async (req, res) => {
   });
 });
 
-exports.updateItem = catchAsync(async (req, res) => {
+exports.updateItem = catchAsync(async (req, res, next) => {
   const item = await Item.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
@@ -60,7 +60,7 @@ exports.updateItem = catchAsync(async (req, res) => {
   });
 });
 
-exports.deleteItem = catchAsync(async (req, res) => {
+exports.deleteItem = catchAsync(async (req, res, next) => {
   await Item.findByIdAndDelete(req.params.id);
 
   if (!item) {
