@@ -1,18 +1,18 @@
 const mongoose = require('mongoose');
-
+const slugify = require('slugify');
 const itemSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'An item must have a name'],
     unique: true,
     trim: true,
-    maxlength: [40, 'An item name must have less or equal then 40 characters'],
-    minlength: [10, 'An item name must have more or equal then 5 characters'],
+    // maxlength: [40, 'An item name must have less or equal then 40 characters'],
+    // minlength: [10, 'An item name must have more or equal then 5 characters'],
     // validate: [validator.isAlpha, 'Item name must only contain characters']
   },
-  size: Number,
+  size: String,
   material: String,
-  //   slug: String,
+  slug: String,
   ratingsAverage: {
     type: Number,
     default: 4.5,
@@ -56,6 +56,16 @@ const itemSchema = new mongoose.Schema({
     default: Date.now(),
     select: false,
   },
+});
+
+itemSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+itemSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
 });
 
 const Item = mongoose.model('Item', itemSchema);
