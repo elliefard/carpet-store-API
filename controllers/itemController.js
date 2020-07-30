@@ -20,7 +20,7 @@ exports.getItem = catchAsync(async (req, res, next) => {
   const item = await Item.findById(req.params.id);
 
   if (!iteem) {
-    return next(new AppError('No tour found with that ID', 404));
+    return next(new AppError('No item found with that ID', 404));
   }
 
   res.status(200).json({
@@ -49,7 +49,7 @@ exports.updateItem = catchAsync(async (req, res, next) => {
   });
 
   if (!item) {
-    return next(new AppError('No tour found with that ID', 404));
+    return next(new AppError('No item found with that ID', 404));
   }
 
   res.status(200).json({
@@ -61,10 +61,10 @@ exports.updateItem = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteItem = catchAsync(async (req, res, next) => {
-  await Item.findByIdAndDelete(req.params.id);
+  const item = await Item.findByIdAndDelete(req.params.id);
 
   if (!item) {
-    return next(new AppError('No tour found with that ID', 404));
+    return next(new AppError('No item found with that ID', 404));
   }
 
   res.status(204).json({
